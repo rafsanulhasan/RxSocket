@@ -40,7 +40,7 @@ public class SomeTest(ITestOutputHelper output) : TestBase(output)
             Write(Environment.CurrentManagedThreadId + ": " + msg + " " + Thread.CurrentThread.Name);
         });
 
-        await Task.Delay(1000);
+        await Task.Delay(1000, TestContext.Current.CancellationToken);
     }
 
     private string OnNext(string str)

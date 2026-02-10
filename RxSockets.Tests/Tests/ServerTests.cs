@@ -16,16 +16,16 @@ public class ServerTest(ITestOutputHelper output) : TestBase(output)
         IRxSocketServer server = RxSocketServer.Create(LogFactory);
         EndPoint endPoint = server.LocalEndPoint;
 
-        ValueTask<IRxSocketClient> acceptTask = server.AcceptAllAsync.FirstAsync();
+        ValueTask<IRxSocketClient> acceptTask = server.AcceptAllAsync.FirstAsync(TestContext.Current.CancellationToken);
 
         Socket clientSocket = Utilities.CreateSocket();
-        await clientSocket.ConnectAsync(endPoint);
+        await clientSocket.ConnectAsync(endPoint, TestContext.Current.CancellationToken);
 
         IRxSocketClient acceptedSocket = await acceptTask;
 
         Assert.True(clientSocket.Connected && acceptedSocket.Connected);
 
-        await clientSocket.DisconnectAsync(false);
+        await clientSocket.DisconnectAsync(false, TestContext.Current.CancellationToken);
         await server.DisposeAsync();
     }
 
@@ -34,14 +34,14 @@ public class ServerTest(ITestOutputHelper output) : TestBase(output)
     {
         IRxSocketServer server = RxSocketServer.Create(LogFactory);
         await server.DisposeAsync();
-        await Assert.ThrowsAsync<InvalidOperationException>(async () => await server.AcceptAllAsync.FirstAsync());
+        await Assert.ThrowsAsync<InvalidOperationException>(async () => await server.AcceptAllAsync.FirstAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]
     public async Task T04_Disconnect_While_Accept()
     {
         IRxSocketServer server = RxSocketServer.Create(LogFactory);
-        ValueTask<IRxSocketClient> acceptTask = server.AcceptAllAsync.FirstAsync();
+        ValueTask<IRxSocketClient> acceptTask = server.AcceptAllAsync.FirstAsync(TestContext.Current.CancellationToken);
         await server.DisposeAsync();
         await Assert.ThrowsAsync<InvalidOperationException>(async () => await acceptTask);
     }

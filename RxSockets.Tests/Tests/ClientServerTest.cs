@@ -29,19 +29,19 @@ public class ClientServerTest(ITestOutputHelper output) : TestBase(output)
             .Concat()
             .Subscribe();
             
-        IRxSocketClient client = await server.LocalEndPoint.CreateRxSocketClientAsync(LogFactory);
+        IRxSocketClient client = await server.LocalEndPoint.CreateRxSocketClientAsync(LogFactory, TestContext.Current.CancellationToken);
 
         // Send the first message without prefix.
         client.Send("Hello1FromClient".ToByteArray());
 
         // Receive the response message without prefix.
-        string message1 = await client.ReceiveAllAsync.ToStrings().FirstAsync();
+        string message1 = await client.ReceiveAllAsync.ToStrings().FirstAsync(TestContext.Current.CancellationToken);
         Assert.Equal("Hello1FromServer", message1);
 
         // Start sending and receiving messages with an int32 message length prefix.
         client.Send(new[] { "Hello2FromClient" }.ToByteArray().ToByteArrayWithLengthPrefix());
 
-        string[] message3 = await client.ReceiveAllAsync.ToArraysFromBytesWithLengthPrefix().ToStringArrays().FirstAsync();
+        string[] message3 = await client.ReceiveAllAsync.ToArraysFromBytesWithLengthPrefix().ToStringArrays().FirstAsync(TestContext.Current.CancellationToken);
         Assert.Equal("Hello2FromServer", message3.Single());
 
         client.ReceiveObservable
@@ -52,7 +52,7 @@ public class ClientServerTest(ITestOutputHelper output) : TestBase(output)
                 Logger.LogInformation(x[0]);
             });
 
-        await Task.Delay(10);
+        await Task.Delay(10, TestContext.Current.CancellationToken);
 
         await client.DisposeAsync();
         await server.DisposeAsync();
@@ -67,13 +67,11 @@ public class ClientServerTest(ITestOutputHelper output) : TestBase(output)
             .Select(acceptClient => Observable.FromAsync(async ct =>
             {
                 string message1 = await acceptClient.ReceiveAllAsync.ToStrings().FirstAsync(ct);
-                //string message1 = await acceptClient.ReceiveObservable.ToStrings().FirstAsync();
                 Assert.Equal("Hello1FromClient", message1);
 
                 acceptClient.Send(new[] { "Hello1FromServer" }.ToByteArray());
 
                 string[] messages = await acceptClient.ReceiveAllAsync.ToArraysFromBytesWithLengthPrefix().ToStringArrays().FirstAsync(ct);
-                //string[] messages = await acceptClient.ReceiveObservable.ToArraysFromBytesWithLengthPrefix().ToStringArrays().FirstAsync();
                 Assert.Equal("Hello2FromClient", messages[0]);
 
                 acceptClient.Send(new[] { "Hello2FromServer" }.ToByteArray().ToByteArrayWithLengthPrefix());
@@ -83,21 +81,19 @@ public class ClientServerTest(ITestOutputHelper output) : TestBase(output)
             .Concat()
             .Subscribe();
 
-        IRxSocketClient client = await server.LocalEndPoint.CreateRxSocketClientAsync(LogFactory);
+        IRxSocketClient client = await server.LocalEndPoint.CreateRxSocketClientAsync(LogFactory, TestContext.Current.CancellationToken);
 
         // Send the first message without prefix.
         client.Send("Hello1FromClient".ToByteArray());
 
         // Receive the response message without prefix.
-        string message1 = await client.ReceiveAllAsync.ToStrings().FirstAsync();
-        //string message1 = await client.ReceiveObservable.ToStrings().FirstAsync();
+        string message1 = await client.ReceiveAllAsync.ToStrings().FirstAsync(TestContext.Current.CancellationToken);
         Assert.Equal("Hello1FromServer", message1);
 
         // Start sending and receiving messages with an int32 message length prefix.
         client.Send(new[] { "Hello2FromClient" }.ToByteArray().ToByteArrayWithLengthPrefix());
 
-        string[] message3 = await client.ReceiveAllAsync.ToArraysFromBytesWithLengthPrefix().ToStringArrays().FirstAsync();
-        //string[] message3 = await client.ReceiveObservable.ToArraysFromBytesWithLengthPrefix().ToStringArrays().FirstAsync();
+        string[] message3 = await client.ReceiveAllAsync.ToArraysFromBytesWithLengthPrefix().ToStringArrays().FirstAsync(TestContext.Current.CancellationToken);
         Assert.Equal("Hello2FromServer", message3.Single());
 
         client.ReceiveObservable
@@ -109,7 +105,7 @@ public class ClientServerTest(ITestOutputHelper output) : TestBase(output)
                 Logger.LogInformation("xxx");
             });
 
-        await Task.Delay(10);
+        await Task.Delay(10, TestContext.Current.CancellationToken);
 
         await client.DisposeAsync();
         await server.DisposeAsync();

@@ -4,8 +4,6 @@ global using System.Net;
 global using System.Net.Sockets;
 global using System.Reactive.Linq;
 global using Xunit;
-global using Xunit.Abstractions;
-global using RxSockets;
 using System.Diagnostics.CodeAnalysis;
 
 [assembly: SuppressMessage("Usage", "IDE0130:Namespace does not match folder structure,")]

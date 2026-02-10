@@ -39,15 +39,15 @@ public sealed class Socket_Recieve_Tests(ITestOutputHelper output) : TestBase(ou
         ServerSocket.Listen(10);
 
         EndPoint endPoint = ServerSocket.LocalEndPoint ?? throw new InvalidOperationException("EndPoint");
-        await Socket.ConnectAsync(endPoint);
+        await Socket.ConnectAsync(endPoint, TestContext.Current.CancellationToken);
 
-        Socket accepted = await ServerSocket.AcceptAsync();
-        await accepted.DisconnectAsync(false);
+        Socket accepted = await ServerSocket.AcceptAsync(TestContext.Current.CancellationToken);
+        await accepted.DisconnectAsync(false, TestContext.Current.CancellationToken);
 
         SocketReceiver reader = new(Socket, "?", Logger, default);
 
         // after the remote socket disconnects, reader.ReceiveByteAsync() returns nothing
-        bool any = await reader.ReceiveAllAsync(default).AnyAsync();
+        bool any = await reader.ReceiveAllAsync(TestContext.Current.CancellationToken).AnyAsync(TestContext.Current.CancellationToken);
         Assert.False(any);
     }
 
@@ -59,18 +59,18 @@ public sealed class Socket_Recieve_Tests(ITestOutputHelper output) : TestBase(ou
         ServerSocket.Listen(10);
 
         EndPoint endPoint = ServerSocket.LocalEndPoint ?? throw new InvalidOperationException("EndPoint");
-        await Socket.ConnectAsync(endPoint);
-        Socket accepted = await ServerSocket.AcceptAsync();
+        await Socket.ConnectAsync(endPoint, TestContext.Current.CancellationToken);
+        Socket accepted = await ServerSocket.AcceptAsync(TestContext.Current.CancellationToken);
 
         SocketReceiver reader = new(Socket, "?", Logger, default);
         //var observable = reader.ReceiveObservable;
-        System.Collections.Generic.IAsyncEnumerable<byte> xxx = reader.ReceiveAllAsync(default);
+        System.Collections.Generic.IAsyncEnumerable<byte> xxx = reader.ReceiveAllAsync(TestContext.Current.CancellationToken);
 
         accepted.Close();
 
         // after the remote socket disconnects, the observable completes
         //var result = await observable.SingleOrDefaultAsync();
-        byte result = await xxx.SingleOrDefaultAsync();
+        byte result = await xxx.SingleOrDefaultAsync(TestContext.Current.CancellationToken);
 
         Assert.Equal(0, result); // default
     }
@@ -83,8 +83,8 @@ public sealed class Socket_Recieve_Tests(ITestOutputHelper output) : TestBase(ou
         ServerSocket.Listen(10);
 
         EndPoint endPoint = ServerSocket.LocalEndPoint ?? throw new InvalidOperationException("EndPoint");
-        await Socket.ConnectAsync(endPoint);
-        Socket accepted = await ServerSocket.AcceptAsync();
+        await Socket.ConnectAsync(endPoint, TestContext.Current.CancellationToken);
+        Socket accepted = await ServerSocket.AcceptAsync(TestContext.Current.CancellationToken);
         Assert.True(Socket.Connected);
         Assert.True(accepted.Connected);
 
@@ -106,13 +106,13 @@ public sealed class Socket_Recieve_Tests(ITestOutputHelper output) : TestBase(ou
         ServerSocket.Listen(10);
 
         EndPoint endPoint = ServerSocket.LocalEndPoint ?? throw new InvalidOperationException("EndPoint");
-        await Socket.ConnectAsync(endPoint);
-        Socket accepted = await ServerSocket.AcceptAsync();
+        await Socket.ConnectAsync(endPoint, TestContext.Current.CancellationToken);
+        Socket accepted = await ServerSocket.AcceptAsync(TestContext.Current.CancellationToken);
         accepted.Send([1]);
 
         SocketReceiver reader = new(Socket, "?", Logger, default);
-        System.Collections.Generic.IAsyncEnumerable<byte> xxx = reader.ReceiveAllAsync(default);
-        byte result = await xxx.FirstAsync();
+        System.Collections.Generic.IAsyncEnumerable<byte> xxx = reader.ReceiveAllAsync(TestContext.Current.CancellationToken);
+        byte result = await xxx.FirstAsync(TestContext.Current.CancellationToken);
         Assert.Equal(1, result);
         accepted.Close();
     }

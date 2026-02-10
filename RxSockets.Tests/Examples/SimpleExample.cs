@@ -19,16 +19,16 @@ public class SimpleExample
                     acceptClient.Send(msg.ToByteArray());
                 }
             }
-        });
+        }, TestContext.Current.CancellationToken);
 
         // Create a client by connecting to the server.
-        IRxSocketClient client = await server.LocalEndPoint.CreateRxSocketClientAsync();
+        IRxSocketClient client = await server.LocalEndPoint.CreateRxSocketClientAsync(TestContext.Current.CancellationToken);
 
         // Send the message "Hello" to the server, which the server will then echo back to the client.
         client.Send("Hello!".ToByteArray());
 
         // Receive the message from the server.
-        string message = await client.ReceiveAllAsync.ToStrings().FirstAsync();
+        string message = await client.ReceiveAllAsync.ToStrings().FirstAsync(TestContext.Current.CancellationToken);
         Assert.Equal("Hello!", message);
 
         await client.DisposeAsync();
@@ -59,7 +59,7 @@ public class SimpleExample
             });
 
         // Create a client connected to the EndPoint of the server.
-        IRxSocketClient client = await server.LocalEndPoint.CreateRxSocketClientAsync();
+        IRxSocketClient client = await server.LocalEndPoint.CreateRxSocketClientAsync(TestContext.Current.CancellationToken);
 
         // Send the message "Hello" to the server, which the server will then echo back to the client.
         client.Send("Hello!".ToByteArray());

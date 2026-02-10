@@ -13,8 +13,8 @@ public class PerformanceTest1(ITestOutputHelper output) : TestBase(output)
         IRxSocketServer server = RxSocketServer.Create();
         EndPoint endPoint = server.LocalEndPoint;
 
-        ValueTask<IRxSocketClient> acceptFirstClientTask = server.AcceptAllAsync.FirstAsync();
-        IRxSocketClient client = await endPoint.CreateRxSocketClientAsync();
+        ValueTask<IRxSocketClient> acceptFirstClientTask = server.AcceptAllAsync.FirstAsync(TestContext.Current.CancellationToken);
+        IRxSocketClient client = await endPoint.CreateRxSocketClientAsync(TestContext.Current.CancellationToken);
         IRxSocketClient acceptClient = await acceptFirstClientTask;
         Task<int> countTask = acceptClient.ReceiveObservable.ToStrings().Count().ToTask();
         //ValueTask<int> countTask = acceptClient.ReceiveAllAsync.ToStrings().CountAsync();
@@ -52,9 +52,9 @@ public class PerformanceTest2(ITestOutputHelper output) : TestBase(output)
     {
         IRxSocketServer server = RxSocketServer.Create();
         EndPoint endPoint = server.LocalEndPoint;
-        ValueTask<IRxSocketClient> acceptFirstClientTask = server.AcceptAllAsync.FirstAsync();
+        ValueTask<IRxSocketClient> acceptFirstClientTask = server.AcceptAllAsync.FirstAsync(TestContext.Current.CancellationToken);
 
-        IRxSocketClient client = await endPoint.CreateRxSocketClientAsync();
+        IRxSocketClient client = await endPoint.CreateRxSocketClientAsync(TestContext.Current.CancellationToken);
         Assert.True(client.Connected);
 
         Task<int> countTask = client

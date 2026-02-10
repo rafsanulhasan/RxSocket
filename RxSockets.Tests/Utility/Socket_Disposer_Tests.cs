@@ -27,7 +27,7 @@ public class Socket_Disposer_Tests(ITestOutputHelper output) : TestBase(output)
 
         Socket clientSocket = Utilities.CreateSocket();
         SocketDisposer clientDisposer = new(clientSocket, "?", Logger, Cts);
-        await clientSocket.ConnectAsync(endPoint);
+        await clientSocket.ConnectAsync(endPoint, TestContext.Current.CancellationToken);
         Assert.False(clientDisposer.DisposeRequested);
         Assert.True(clientSocket.Connected);
 
@@ -55,7 +55,7 @@ public class Socket_Disposer_Tests(ITestOutputHelper output) : TestBase(output)
 
         Socket socket = Utilities.CreateSocket();
         SocketDisposer disposer = new(socket, "?", Logger, Cts);
-        await socket.ConnectAsync(endPoint);
+        await socket.ConnectAsync(endPoint, TestContext.Current.CancellationToken);
         Assert.True(socket.Connected);
         Assert.False(disposer.DisposeRequested);
 
@@ -76,7 +76,7 @@ public class Socket_Disposer_Tests(ITestOutputHelper output) : TestBase(output)
         SocketDisposer disposer = new(clientSocket, "?", Logger, Cts);
         Assert.False(disposer.DisposeRequested);
 
-        await clientSocket.ConnectAsync(endPoint);
+        await clientSocket.ConnectAsync(endPoint, TestContext.Current.CancellationToken);
         Assert.True(clientSocket.Connected);
 
         clientSocket.Dispose();

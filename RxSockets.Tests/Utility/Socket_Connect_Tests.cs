@@ -13,7 +13,7 @@ public class SocketConnectTests(ITestOutputHelper output) : TestBase(output)
         serverSocket.Listen(10);
         EndPoint actualServerEndpoint = serverSocket.LocalEndPoint ?? throw new InvalidOperationException();
 
-        IRxSocketClient client = await actualServerEndpoint.CreateRxSocketClientAsync(Logger);
+        IRxSocketClient client = await actualServerEndpoint.CreateRxSocketClientAsync(Logger, TestContext.Current.CancellationToken);
         Assert.True(client.Connected);
 
         await client.DisposeAsync();
@@ -24,7 +24,7 @@ public class SocketConnectTests(ITestOutputHelper output) : TestBase(output)
     public async Task T01_Connection_Refused_Test()
     {
         IPEndPoint endPoint = TestUtilities.GetEndPointOnRandomLoopbackPort();
-        SocketException e = await Assert.ThrowsAsync<SocketException>(async () => await endPoint.CreateRxSocketClientAsync(Logger));
+        SocketException e = await Assert.ThrowsAsync<SocketException>(async () => await endPoint.CreateRxSocketClientAsync(Logger, TestContext.Current.CancellationToken));
         Assert.Equal((int)SocketError.ConnectionRefused, e.ErrorCode);
     }
 

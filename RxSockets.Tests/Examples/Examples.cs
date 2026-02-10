@@ -25,7 +25,7 @@ public class Examples(ITestOutputHelper output) : TestBase(output)
         });
 
         // Create a socket client by first connecting to the server at the EndPoint.
-        IRxSocketClient client = await endPoint.CreateRxSocketClientAsync(LogFactory);
+        IRxSocketClient client = await endPoint.CreateRxSocketClientAsync(LogFactory, TestContext.Current.CancellationToken);
 
         // Start receiving messages from the server.
         client.ReceiveObservable.ToStrings().Subscribe(onNext: message =>
@@ -37,7 +37,7 @@ public class Examples(ITestOutputHelper output) : TestBase(output)
         // Send the message "Hello" to the server (which will be echoed back to the client).
         client.Send("Hello!".ToByteArray());
 
-        await Task.Delay(100);
+        await Task.Delay(100, TestContext.Current.CancellationToken);
 
         // Disconnect and dispose.
         await client.DisposeAsync();
@@ -51,10 +51,10 @@ public class Examples(ITestOutputHelper output) : TestBase(output)
         EndPoint endPoint = server.LocalEndPoint;
 
         // Start a task to allow the server to accept the next client connection.
-        ValueTask<IRxSocketClient> acceptTask = server.AcceptAllAsync.FirstAsync();
+        ValueTask<IRxSocketClient> acceptTask = server.AcceptAllAsync.FirstAsync(TestContext.Current.CancellationToken);
 
         // Create a socket client by successfully connecting to the server at EndPoint.
-        IRxSocketClient client = await endPoint.CreateRxSocketClientAsync(LogFactory);
+        IRxSocketClient client = await endPoint.CreateRxSocketClientAsync(LogFactory, TestContext.Current.CancellationToken);
 
         // Get the client socket accepted by the server.
         IRxSocketClient accept = await acceptTask;
@@ -77,8 +77,8 @@ public class Examples(ITestOutputHelper output) : TestBase(output)
         IRxSocketServer server = RxSocketServer.Create(LogFactory);
         EndPoint endPoint = server.LocalEndPoint;
 
-        ValueTask<IRxSocketClient> acceptTask = server.AcceptAllAsync.FirstAsync();
-        IRxSocketClient client = await endPoint.CreateRxSocketClientAsync(LogFactory);
+        ValueTask<IRxSocketClient> acceptTask = server.AcceptAllAsync.FirstAsync(TestContext.Current.CancellationToken);
+        IRxSocketClient client = await endPoint.CreateRxSocketClientAsync(LogFactory, TestContext.Current.CancellationToken);
         IRxSocketClient accept = await acceptTask;
 
         IDisposable sub = client.ReceiveObservable.ToStrings().Subscribe(str =>
@@ -89,7 +89,7 @@ public class Examples(ITestOutputHelper output) : TestBase(output)
         accept.Send("Welcome!".ToByteArray());
         accept.Send("Welcome Again!".ToByteArray());
 
-        await Task.Delay(100);
+        await Task.Delay(100, TestContext.Current.CancellationToken);
 
         sub.Dispose();
 
@@ -112,9 +112,9 @@ public class Examples(ITestOutputHelper output) : TestBase(output)
         server.AcceptObservable
             .Subscribe(accepted => accepted.Send("Welcome!".ToByteArray()));
 
-        IRxSocketClient client1 = await endPoint.CreateRxSocketClientAsync(LogFactory);
-        IRxSocketClient client2 = await endPoint.CreateRxSocketClientAsync(LogFactory);
-        IRxSocketClient client3 = await endPoint.CreateRxSocketClientAsync(LogFactory);
+        IRxSocketClient client1 = await endPoint.CreateRxSocketClientAsync(LogFactory, TestContext.Current.CancellationToken);
+        IRxSocketClient client2 = await endPoint.CreateRxSocketClientAsync(LogFactory, TestContext.Current.CancellationToken);
+        IRxSocketClient client3 = await endPoint.CreateRxSocketClientAsync(LogFactory, TestContext.Current.CancellationToken);
 
         Assert.Equal("Welcome!", await client1.ReceiveObservable.ToStrings().Take(1).FirstAsync());
         Assert.Equal("Welcome!", await client2.ReceiveObservable.ToStrings().Take(1).FirstAsync());
@@ -145,7 +145,7 @@ public class Examples(ITestOutputHelper output) : TestBase(output)
         List<IRxSocketClient> clients = [];
         for (int i = 0; i < 3; i++)
         {
-            IRxSocketClient client = await endPoint.CreateRxSocketClientAsync(LogFactory);
+            IRxSocketClient client = await endPoint.CreateRxSocketClientAsync(LogFactory, TestContext.Current.CancellationToken);
             client.Send("Hello".ToByteArray());
             clients.Add(client);
         }
@@ -177,7 +177,7 @@ public class Examples(ITestOutputHelper output) : TestBase(output)
             });
         });
 
-        IRxSocketClient client = await endPoint.CreateRxSocketClientAsync(LogFactory);
+        IRxSocketClient client = await endPoint.CreateRxSocketClientAsync(LogFactory, TestContext.Current.CancellationToken);
         client.ReceiveObservable.ToStrings().Subscribe(onNext: message =>
         {
             Write(message);
@@ -185,7 +185,7 @@ public class Examples(ITestOutputHelper output) : TestBase(output)
 
         client.Send("Hello!".ToByteArray());
 
-        await semaphore.WaitAsync();
+        await semaphore.WaitAsync(TestContext.Current.CancellationToken);
         if (acceptClient is null)
             throw new NullReferenceException(nameof(acceptClient));
 
@@ -214,14 +214,14 @@ public class Examples(ITestOutputHelper output) : TestBase(output)
             });
         });
 
-        IRxSocketClient client = await endPoint.CreateRxSocketClientAsync(LogFactory);
+        IRxSocketClient client = await endPoint.CreateRxSocketClientAsync(LogFactory, TestContext.Current.CancellationToken);
         client.ReceiveObservable.ToStrings().Subscribe(onNext: message =>
         {
             Write(message);
         });
 
         client.Send("Hello!".ToByteArray());
-        await semaphore.WaitAsync();
+        await semaphore.WaitAsync(TestContext.Current.CancellationToken);
         if (acceptClient is null)
             throw new NullReferenceException(nameof(acceptClient));
 
